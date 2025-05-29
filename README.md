@@ -56,6 +56,7 @@ For the full overview, see **Sections 3.2, 3.3, and 3.4 (pages 18–42)** in the
     - Document Object Model
 - REST API - MapQuest API
 - SOAP API - Rescuetrack API
+- Docker
 - Socket.IO
 - HTML
 - CSS
