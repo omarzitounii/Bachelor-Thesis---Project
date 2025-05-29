@@ -33,7 +33,7 @@ The figure below illustrates the architecture of the **ISAN Communications Platf
   - The **Workflow  (WFM)** ensures that all processes are executed in the correct order and sequence. Crucially, the **Communication Manager (ComMng)** is responsible for managing the data exchange between all systems, ensuring that information flows reliably and in real time.
 
 <p align="center">
-  <img src="ISAN_Communications-Platform.png" alt="ISAN System" style="width:75%;"><br>
+  <img src="ISAN_Communications-Platform.PNG" alt="ISAN System" style="width:75%;"><br>
   <em>Figure: ISAN Communications Platform overview</em>
 </p>
 
