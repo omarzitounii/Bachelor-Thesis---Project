@@ -1,6 +1,6 @@
 # Bachelor Thesis Project
 
-**Note:** This repository contains only a small part of the overall project code. The uploaded files represent the core files where I contributed substantial blocks of code. I am not allowed to share the full project due to institutional restrictions. As a result, this code cannot be run independently. However, I will use this README to summarize the work I did.
+**Note:** This repository contains only a **small part** of the overall project code. The uploaded files represent the core files where I contributed **substantial blocks** of code. I am not allowed to share the full project due to institutional restrictions. As a result, this code cannot be run independently. However, I will use this README to summarize the work I did.
 
 - [Introduction](#1-introduction)
 - [Objectives and Scope](#2-objectives-and-scope)
@@ -8,6 +8,8 @@
 - [Technologies Used](#4-technologies-used)
 
 <img src="Tracking_Page.PNG">
+
+To view a demonstration of the tracking feature, see the **video** included in the Video folder, where simulation scenarios were used to show the different cases that the system can now handle.
 
 ## 1. Introduction
 
