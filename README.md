@@ -8,7 +8,7 @@
 - [Technologies Used](#4-technologies-used)
 
 <p align="center">
-  <img src="Tracking_PAGE.PNG"><br>
+  <img src="Tracking_Page.PNG"><br>
   <em>Implemented Tracking Page Overview</em>
 </p>
 
