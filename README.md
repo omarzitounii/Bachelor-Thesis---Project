@@ -4,10 +4,13 @@
 
 - [Introduction](#1-introduction)
 - [Objectives and Scope](#2-objectives-and-scope)
-- [Work Description](#3-work-description)
+- [Technical Workflow](#3-technical-workflow)
 - [Technologies Used](#4-technologies-used)
 
-<img src="Tracking_Page.PNG">
+<p align="center">
+  <img src="Tracking_PAGE.PNG"><br>
+  <em>Implemented Tracking Page Overview</em>
+</p>
 
 To view a demonstration of the tracking feature, see the **video** included in the Video folder, where simulation scenarios were used to show the different cases that the system can now handle.
 
@@ -47,7 +50,7 @@ The primary objective of this thesis was to integrate the Rescuetrack API and Ma
 
 For more details, read **1.3 Task Description** in the Bachelor thesis pdf.
 
-## 3. Integration & Implementation
+## 3. Technical Workflow
 
 <!--Placeholder-->
 
