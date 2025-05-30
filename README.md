@@ -7,6 +7,8 @@
 - [Work Description](#3-work-description)
 - [Technologies Used](#4-technologies-used)
 
+<img src="Tracking_Page.PNG">
+
 ## 1. Introduction
 
 The work presented in this thesis is part of the development of the **International Standard Accident Number (ISAN) Platform** — a digital platform designed to enable fully automated communication across all stakeholders in an emergency, including alerting systems, responding systems, and curing systems.
@@ -43,11 +45,11 @@ The primary objective of this thesis was to integrate the Rescuetrack API and Ma
 
 For more details, read **1.3 Task Description** in the Bachelor thesis pdf.
 
-## 3. Work Description
+## 3. Integration & Implementation
 
 <!--Placeholder-->
 
-For the full overview, see **Sections 3.2, 3.3, and 3.4 (pages 18–42)** in the Bachelor thesis PDF.
+For the full overview of the methodology, read the text of **Sections 3.2, 3.3, and 3.4 (pages 18–42)** in the Bachelor thesis PDF.
 
 ## 4. Technologies Used
 
