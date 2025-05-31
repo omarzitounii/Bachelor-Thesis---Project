@@ -4,12 +4,12 @@
 
 - [Introduction](#1-introduction)
 - [Objectives and Scope](#2-objectives-and-scope)
-- [Technical Workflow](#3-technical-workflow)
+- [Development & Integration Overview](#3-development--integration-overview)
 - [Technologies Used](#4-technologies-used)
 
 <p align="center">
   <img src="Tracking_Page.PNG"><br>
-  <em>Implemented Tracking Page Overview</em>
+  <em>Implemented Tracking Page - Overview</em>
 </p>
 
 To view a demonstration of the tracking feature, see the **video** included in the Video folder, where simulation scenarios were used to show the different cases that the system can now handle.
@@ -50,20 +50,21 @@ The primary objective of this thesis was to integrate the Rescuetrack API and Ma
 
 For more details, read **1.3 Task Description** in the Bachelor thesis pdf.
 
-## 3. Technical Workflow
+## 3. Development & Integration Overview
 
 <!--Placeholder-->
 
-For the full overview of the methodology, read the text of **Sections 3.2, 3.3, and 3.4 (pages 18–42)** in the Bachelor thesis PDF.
+For the full overview of the methodology, read **Sections 3.2, 3.3, and 3.4 (pages 18–42)** in the Bachelor thesis PDF.
 
 ## 4. Technologies Used
 
-- Python (Flask)
+- Flask (Python)
 - Javascript
     - Document Object Model
+- MySQL
+- Docker
 - REST API - MapQuest API
 - SOAP API - Rescuetrack API
-- Docker
 - Socket.IO
 - HTML
 - CSS
