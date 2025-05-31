@@ -83,6 +83,53 @@ Similarly, once the generated ISAN is assigned a hospital, a second route — fr
 
 ### 3.2 The transmission of location data from the Responding Systems to the Curing Systems.
 
+1. When the tracking page is opened in the Curing System, the Workflow Manager is notified that the system is now waiting to receive location data from the Responding Systems.
+
+2. The Workflow Manager verifies the Curing System via the Curing System Manager. Once verified, the request is forwarded to the Communication Manager.
+
+3. If this is the first Curing System to request tracking data, The Communication Manager launches two separate threads:
+    - The first queries the Responding System Manager for the IP addresses of all currently active Responding Systems.
+    - The second uses those IPs to retrieve live location data, which it forwards to all Curing Systems that currently have the tracking page open.
+
+   This process is repeated every 5 seconds, as long as at least one Curing System remains on the tracking page.
+
+If a Curing System exits the tracking page, the Communication Manager is notified (just like in step 1) and stops sending data to that system.
+
+<p align="center">
+  <img src="README_Images/Methodology_3.PNG" alt="Methodology-3" style="width:80%;"><br>
+</p>
+
+For simulation scenarios, the process works similarly, with one key difference in step 3:
+
+Before fetching the coordinates from the Responding Systems, the Communication Manager sends a POST request instructing them to start reading location data from a CSV file in a separate thread. This thread simulates real-time tracking by reading one line from the file every second
+
+This simulated tracking thread automatically stops either when the user on the Curing System exits the tracking page or when the patient has been successfully transported to the hospital.
+
+### 3.3 The processing of location data from the Responding Systems by the Curing Systems.
+
+As the Curing System backend receives ambulance-to-incident location data from a Responding System, it emits this data to the Curing System frontend via Socket.IO.
+
+Upon receiving the first data point, an ambulance marker and an incident marker are created at the corresponding coordinates. Additionally, the MapQuest API is used to retrieve the fastest route from the ambulance's current location to the incident site, and a route polyline is drawn on the map.
+
+For each subsequent update, the ambulance marker is moved to its new position, and the route polyline is adjusted to start from the coordinate closest to the updated ambulance location.
+
+<p align="center">
+  <img src="README_Images/Methodology_4.PNG" alt="Methodology-4" style="width:80%;"><br>
+</p>
+
+The processing of ambulance-to-hospital location data works similarly, with one key difference:
+Upon receiving the first update, the incident marker is replaced by an X marker, indicating that the patient has been loaded into the ambulance.
+
+<p align="center">
+  <img src="README_Images/Methodology_5.PNG" alt="Methodology-5" style="width:80%;"><br>
+</p>
+
+When the marker at_hospital is received in the location data of an ambulance, all related elements are removed from the map — including the ambulance marker, X marker, hospital marker, and the drawn route polyline.
+
+<p align="center">
+  <img src="README_Images/Methodology_6.PNG" alt="Methodology-6" style="width:80%;"><br>
+</p>
+
 ## 4. Technologies Used
 
 - Flask (Python)

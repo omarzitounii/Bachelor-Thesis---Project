@@ -1,5 +1,6 @@
 __author__ = "Omar Zitouni"
 # !! For posting on Github, i deleted the real username & password from the soap envelop !!
+# !! For posting on Github, i deleted the real MapQuest API - Key !!
 
 import flask
 from flask import Response
