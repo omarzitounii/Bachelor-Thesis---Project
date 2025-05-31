@@ -13,7 +13,7 @@ import requests
 import json
 import urllib
 from flask import jsonify
-from math import sin, cos, sqrt, atan2, pi 
+from math import sin, cos, sqrt, atan2, pi
 from connectDB import myDB
 import xml.etree.ElementTree as ET
 import threading
@@ -41,15 +41,13 @@ finalDestinationToHospitalCoordinate = []
 # using the Haversine formula. The formula is commonly used in geography and geodesy.
 # Reference: https://en.wikipedia.org/wiki/Haversine_formula
 # Generated with the assistance of ChatGPT by OpenAI.
-def get_distance_from_lat_lon_in_meters(lat1, lon1, lat2, lon2): 
+def get_distance_from_lat_lon_in_meters(lat1, lon1, lat2, lon2):
     R = 6371000
     d_lat = (lat2 - lat1) * (pi / 180)
-    d_lon = (lon2 - lon1) * (pi / 180)   
-    a = (sin(d_lat / 2) * sin(d_lat / 2) + 
-         cos(lat1 * (pi / 180)) * 
-         cos(lat2 * (pi / 180)) * 
-         sin(d_lon / 2) * 
-         sin(d_lon / 2))   
+    d_lon = (lon2 - lon1) * (pi / 180)
+    a = sin(d_lat / 2) * sin(d_lat / 2) + cos(lat1 * (pi / 180)) * cos(
+        lat2 * (pi / 180)
+    ) * sin(d_lon / 2) * sin(d_lon / 2)
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
     return R * c
 
@@ -70,12 +68,14 @@ def get_location_as_map_request(location: str) -> str:
 # If evrything works correctly, the lat and lng are returned
 # If not, 2x None are returned
 positionID = 0
+
+
 def send_soap_request_soap11():
     global positionID
     url = "https://api.rescuetrack.de/ws/v4/rescuetrack.asmx"
     headers = {
         "Content-Type": "text/xml; charset=utf-8",
-        "SOAPAction": "http://www.rescuetrack.de/GetPositions"
+        "SOAPAction": "http://www.rescuetrack.de/GetPositions",
     }
     data = f"""<?xml version="1.0" encoding="utf-8"?>
     <soap:Envelope
@@ -92,15 +92,17 @@ def send_soap_request_soap11():
       </soap:Body>
     </soap:Envelope>"""
     try:
-        response = requests.post(url, headers=headers, data=data) #MODIFICATION N2 FOR POLLING: timeout=60 and LongPolling option
+        response = requests.post(
+            url, headers=headers, data=data
+        )  # MODIFICATION N2 FOR POLLING: timeout=60 and LongPolling option
         if response.status_code == 204:
             print("No content in the response (204).")
             return None, None
-        response.raise_for_status() 
+        response.raise_for_status()
         root = ET.fromstring(response.content)
         namespaces = {
-            'soap': 'http://schemas.xmlsoap.org/soap/envelope/',
-            'ns': 'http://www.rescuetrack.de/'
+            "soap": "http://schemas.xmlsoap.org/soap/envelope/",
+            "ns": "http://www.rescuetrack.de/",
         }
         positions = root.findall(".//ns:ObjectPosition", namespaces=namespaces)
         if not positions:
@@ -111,16 +113,22 @@ def send_soap_request_soap11():
         latest_position = positions[-1]
         latitude = latest_position.attrib.get("Latitude")
         longitude = latest_position.attrib.get("Longitude")
-        positionTimestamp = latest_position.attrib.get("Timestamp") # ONE
-        #IMPORTANT MODIFICATION N1:
+        positionTimestamp = latest_position.attrib.get("Timestamp")  # ONE
+        # IMPORTANT MODIFICATION N1:
         position_id = latest_position.attrib.get("Id")
-        if latitude is not None and longitude is not None and positionTimestamp is not None: # THREE
-            print(f"Current position: Latitude={latitude}, Longitude={longitude}, Timestamp of the position={positionTimestamp}")
+        if (
+            latitude is not None
+            and longitude is not None
+            and positionTimestamp is not None
+        ):  # THREE
+            print(
+                f"Current position: Latitude={latitude}, Longitude={longitude}, Timestamp of the position={positionTimestamp}"
+            )
             print(f"Response Text:")
             print(response.text)
             if position_id is not None:
                 positionID = position_id
-            return float(latitude), float(longitude), positionTimestamp # TWO
+            return float(latitude), float(longitude), positionTimestamp  # TWO
         else:
             return None, None, None
     except requests.RequestException as req_err:
@@ -141,9 +149,14 @@ def send_soap_request_soap11():
         time.sleep(5)
         return None, None, None
 
-justTestingWithOutRoutes = False #TESTING: TO BE DELETE
+
+justTestingWithOutRoutes = False  # TESTING: TO BE DELETE
+
+
 # OZ: When an emergency is assigned, this function should start the process of taking the coordinates from the rescuetrack.
-def startGettingCoordinatesFromRescuetrack(id, isan_instance, isan, brokenAmbulanceLocation):
+def startGettingCoordinatesFromRescuetrack(
+    id, isan_instance, isan, brokenAmbulanceLocation
+):
     global current_location, hospitalCoordinates, STOP_TRACKING, ID_INT, ISAN, patientLoadedIntoAmbulance, patientLoadedIntoHospital, finalDestinationToIncidentCoordinate, finalDestinationToHospitalCoordinate, positionID, justTestingWithOutRoutes
     current_location = {}
     hospitalCoordinates = []
@@ -161,7 +174,9 @@ def startGettingCoordinatesFromRescuetrack(id, isan_instance, isan, brokenAmbula
             )
             response_json = map_quest_api_res.content.decode("utf-8")
             if map_quest_api_res.status_code == 200:
-                location = json.loads(response_json)["results"][0]["locations"][0]["displayLatLng"]
+                location = json.loads(response_json)["results"][0]["locations"][0][
+                    "displayLatLng"
+                ]
                 lat = location["lat"]
                 lng = location["lng"]
                 incidentCoordinates = [lat, lng]
@@ -174,7 +189,7 @@ def startGettingCoordinatesFromRescuetrack(id, isan_instance, isan, brokenAmbula
             return
     else:
         lat = brokenAmbulanceLocation["lat"]
-        lng = brokenAmbulanceLocation["lng"]  
+        lng = brokenAmbulanceLocation["lng"]
         incidentCoordinates = [lat, lng]
     myCursor = myDB.cursor()
     if REAL_TRACKING:
@@ -185,29 +200,41 @@ def startGettingCoordinatesFromRescuetrack(id, isan_instance, isan, brokenAmbula
                 print(f"Failed to fetch coordinates from Rescuetrack API.")
                 # TESTING INSERTING COORDINATES INTO THE DATABASE:
                 sql = "INSERT INTO gps_logs (timestamp, latitude, longitude, position_timestamp) VALUES (%s, %s, %s, %s)"
-                values = (datetime.now().isoformat(timespec='milliseconds'), None, None, None)  
+                values = (
+                    datetime.now().isoformat(timespec="milliseconds"),
+                    None,
+                    None,
+                    None,
+                )
                 try:
                     myCursor.execute(sql, values)
-                    myDB.commit() 
+                    myDB.commit()
                     print(f"Saved to Coordinates to table (gps_logs)")
                 except Exception as e:
-                    print(f"Database insert failed: {str(e)}")  
+                    print(f"Database insert failed: {str(e)}")
                 # TESTING INSERTING COORDINATES INTO THE DATABASE;
-                time.sleep(10)  
+                time.sleep(10)
                 continue
             latitude, longitude, positionTimestamp = vehicleCoordinates
             sql = "INSERT INTO gps_logs (timestamp, latitude, longitude, position_timestamp) VALUES (%s, %s, %s, %s)"
-            values = (datetime.now().isoformat(timespec='milliseconds'), latitude, longitude, positionTimestamp)
+            values = (
+                datetime.now().isoformat(timespec="milliseconds"),
+                latitude,
+                longitude,
+                positionTimestamp,
+            )
             try:
                 myCursor.execute(sql, values)
-                myDB.commit() 
+                myDB.commit()
                 print(f"Saved to Coordinates to table (gps_logs)")
             except Exception as e:
                 print(f"Database insert failed: {str(e)}")
             # Another Modification:
-            #latitude = round(latitude, 5)  
-            #longitude = round(longitude, 5)
-            if not patientLoadedIntoAmbulance: #and justTestingWithOutRoutes: #TESTING: TO BE  DELETE
+            # latitude = round(latitude, 5)
+            # longitude = round(longitude, 5)
+            if (
+                not patientLoadedIntoAmbulance
+            ):  # and justTestingWithOutRoutes: #TESTING: TO BE  DELETE
                 current_location = {
                     "id": ID_INT,
                     "lat": latitude,
@@ -215,9 +242,13 @@ def startGettingCoordinatesFromRescuetrack(id, isan_instance, isan, brokenAmbula
                     "incident_location": {
                         "lat": incidentCoordinates[0],
                         "lng": incidentCoordinates[1],
-                    }
+                    },
                 }
-            elif hospitalCoordinates and patientLoadedIntoAmbulance and not patientLoadedIntoHospital: #and justTestingWithOutRoutes: #TESTING: TO BE DELETE
+            elif (
+                hospitalCoordinates
+                and patientLoadedIntoAmbulance
+                and not patientLoadedIntoHospital
+            ):  # and justTestingWithOutRoutes: #TESTING: TO BE DELETE
                 current_location = {
                     "id": ID_INT,
                     "lat": latitude,
@@ -225,26 +256,26 @@ def startGettingCoordinatesFromRescuetrack(id, isan_instance, isan, brokenAmbula
                     "hospital_location": {
                         "lat": hospitalCoordinates[0],
                         "lng": hospitalCoordinates[1],
-                    }
+                    },
                 }
             elif patientLoadedIntoHospital:
                 current_location = {
                     "id": ID_INT,
                     "lat": latitude,
                     "lng": longitude,
-                    "isAtHospital": {}
+                    "isAtHospital": {},
                 }
                 STOP_TRACKING = True
                 positionID = 0
                 break
             else:
                 current_location = {
-                    "id": ID_INT,  
+                    "id": ID_INT,
                     "lat": latitude,
                     "lng": longitude,
-                }      
+                }
             print(f"Current Location: {current_location}")
-            #time.sleep(10)  # Time between SOAP requests
+            # time.sleep(10)  # Time between SOAP requests
     myCursor.close()
     # !!!                                      !!!
     # !!!                                      !!!
@@ -254,14 +285,17 @@ def startGettingCoordinatesFromRescuetrack(id, isan_instance, isan, brokenAmbula
     if not REAL_TRACKING:
         finalDestinationToIncidentCoordinate = []
         finalDestinationToHospitalCoordinate = []
-        startingCoordinates = [52.27483, 10.5053]  
+        startingCoordinates = [52.27483, 10.5053]
         url = f"https://www.mapquestapi.com/directions/v2/route?key=3Q4Af0BEG1RNVbxvCXs0caWccrX075Du&from={startingCoordinates[0]},{startingCoordinates[1]}&to={incidentCoordinates[0]},{incidentCoordinates[1]}&unit=k&fullShape=true&shapeFormat=raw"
         try:
             response = requests.get(url)
             response.raise_for_status()
             data = response.json()
             shapePoints = data["route"]["shape"]["shapePoints"]
-            routeCoordinates = [[shapePoints[i], shapePoints[i + 1]] for i in range(0, len(shapePoints), 2)]
+            routeCoordinates = [
+                [shapePoints[i], shapePoints[i + 1]]
+                for i in range(0, len(shapePoints), 2)
+            ]
             finalDestinationToIncidentCoordinate = routeCoordinates[-1]
             logging.info(f"Route coordinates fetched successfully for RES_ID: {id}")
         except Exception as e:
@@ -279,55 +313,80 @@ def startGettingCoordinatesFromRescuetrack(id, isan_instance, isan, brokenAmbula
         time.sleep(60)
         with open(file_name, mode="r") as csv_file:
             csv_reader = csv.reader(csv_file)
-            rows = list(csv_reader)  
-            row_index = 0  
+            rows = list(csv_reader)
+            row_index = 0
         while not STOP_TRACKING:
             if row_index < len(rows):
-                vehicleCoordinates = [float(rows[row_index][0]), float(rows[row_index][1])]
-                row_index += 1  
-            if get_distance_from_lat_lon_in_meters(vehicleCoordinates[0], vehicleCoordinates[1], finalDestinationToIncidentCoordinate[0], finalDestinationToIncidentCoordinate[1]) < 5:
-                patientLoadedIntoAmbulance = True   
+                vehicleCoordinates = [
+                    float(rows[row_index][0]),
+                    float(rows[row_index][1]),
+                ]
+                row_index += 1
+            if (
+                get_distance_from_lat_lon_in_meters(
+                    vehicleCoordinates[0],
+                    vehicleCoordinates[1],
+                    finalDestinationToIncidentCoordinate[0],
+                    finalDestinationToIncidentCoordinate[1],
+                )
+                < 5
+            ):
+                patientLoadedIntoAmbulance = True
             if finalDestinationToHospitalCoordinate:
-                if get_distance_from_lat_lon_in_meters(vehicleCoordinates[0], vehicleCoordinates[1], finalDestinationToHospitalCoordinate[0], finalDestinationToHospitalCoordinate[1]) < 5:
-                    patientLoadedIntoHospital = True     
+                if (
+                    get_distance_from_lat_lon_in_meters(
+                        vehicleCoordinates[0],
+                        vehicleCoordinates[1],
+                        finalDestinationToHospitalCoordinate[0],
+                        finalDestinationToHospitalCoordinate[1],
+                    )
+                    < 5
+                ):
+                    patientLoadedIntoHospital = True
             if not patientLoadedIntoAmbulance:
                 current_location = {
-                    "id": ID_INT,  
+                    "id": ID_INT,
                     "lat": vehicleCoordinates[0],
                     "lng": vehicleCoordinates[1],
                     "incident_location": {
-                        "lat": incidentCoordinates[0],  
-                        "lng": incidentCoordinates[1],  
-                    }
+                        "lat": incidentCoordinates[0],
+                        "lng": incidentCoordinates[1],
+                    },
                 }
-            elif hospitalCoordinates and patientLoadedIntoAmbulance and not patientLoadedIntoHospital: 
+            elif (
+                hospitalCoordinates
+                and patientLoadedIntoAmbulance
+                and not patientLoadedIntoHospital
+            ):
                 current_location = {
-                    "id": ID_INT,  
+                    "id": ID_INT,
                     "lat": vehicleCoordinates[0],
                     "lng": vehicleCoordinates[1],
                     "hospital_location": {
-                        "lat": hospitalCoordinates[0],  
-                        "lng": hospitalCoordinates[1],  
-                    }
+                        "lat": hospitalCoordinates[0],
+                        "lng": hospitalCoordinates[1],
+                    },
                 }
-            elif patientLoadedIntoHospital: # OZ: This should be a button preferably (patientLoadedIntoHospital)
+            elif (
+                patientLoadedIntoHospital
+            ):  # OZ: This should be a button preferably (patientLoadedIntoHospital)
                 current_location = {
-                    "id": ID_INT,  
+                    "id": ID_INT,
                     "lat": vehicleCoordinates[0],
                     "lng": vehicleCoordinates[1],
-                    "isAtHospital": {}
+                    "isAtHospital": {},
                 }
                 STOP_TRACKING = True
                 break
             # can be deleted
             else:
                 current_location = {
-                    "id": ID_INT,  
+                    "id": ID_INT,
                     "lat": vehicleCoordinates[0],
                     "lng": vehicleCoordinates[1],
                 }
             print(f"RS Thread of Current location: {current_location}")
-            time.sleep(1)    
+            time.sleep(1)
 
 
 def set_patient_loaded_into_ambulance():
@@ -341,13 +400,16 @@ def set_patient_loaded_into_hospital():
     patientLoadedIntoHospital = True
     return jsonify({"message": "Patient successfully loaded into hospital."}), 200
 
+
 def check_tracking_status():
     return jsonify({"STOP_TRACKING": STOP_TRACKING})
+
 
 def test():
     while True:
         print(f"I'm the separate thread!")
         time.sleep(5)  # Sleep to prevent excessive logging
+
 
 # OZ: Get the hospital location to transport the patient to.
 def setHospitalLocation(lat, lng):
@@ -370,16 +432,21 @@ def setHospitalLocation(lat, lng):
                 response.raise_for_status()
                 data = response.json()
                 shapePoints = data["route"]["shape"]["shapePoints"]
-                routeCoordinates = [[shapePoints[i], shapePoints[i + 1]] for i in range(0, len(shapePoints), 2)]
+                routeCoordinates = [
+                    [shapePoints[i], shapePoints[i + 1]]
+                    for i in range(0, len(shapePoints), 2)
+                ]
                 finalDestinationToHospitalCoordinate = routeCoordinates[-1]
             except Exception as e:
-                logging.error(f"Error occurred while fetching route to hospital: {str(e)}")
+                logging.error(
+                    f"Error occurred while fetching route to hospital: {str(e)}"
+                )
                 return
             try:
                 with open(file_name, mode="a", newline="") as file:
                     csv_writer = csv.writer(file)
                     for coord in routeCoordinates:
-                        csv_writer.writerow([coord[0], coord[1]]) 
+                        csv_writer.writerow([coord[0], coord[1]])
                 logging.info(f"Route coordinates written successfully to {file_name}")
             except Exception as e:
                 logging.error(f"Error occurred while writing CSV file: {str(e)}")
@@ -392,7 +459,7 @@ def setHospitalLocation(lat, lng):
 def practical_get_current_ambulance_location():
     global current_location
     try:
-        if not current_location:  
+        if not current_location:
             return jsonify({"status": "success", "position": None}), 200
         return jsonify({"status": "success", "position": current_location}), 200
     except Exception as e:
@@ -400,11 +467,10 @@ def practical_get_current_ambulance_location():
         return {"status": "error", "message": f"An error occurred: {str(e)}"}, 500
 
 
-
 # !!! TO BE DELETED, JUST USED FOR TESTING !!!
 def csvStopTracking():
-  global STOP_TRACKING
-  STOP_TRACKING = True
+    global STOP_TRACKING
+    STOP_TRACKING = True
 
 
 # OZ: GET endpoint to verify if the provided ISAN exists in the ambulance records.
@@ -421,11 +487,11 @@ def practical_get_main_ambulance_id():
         if result[0] > 0:
             return jsonify({"status": "success", "message": "ISAN found"}), 200
         else:
-            return jsonify({"error": "ISAN not found"}), 404 
+            return jsonify({"error": "ISAN not found"}), 404
     except Exception as e:
         logging.error(f"Error retrieving main ambulance ID: {str(e)}")
         return jsonify({"error": "Failed to retrieve main ambulance ID"}), 500
-    
+
 
 # OZ: Should be activated when the ambulance breakdown
 def breakdown():
@@ -443,20 +509,18 @@ def breakdown():
         payload = {
             "ambulanceId": ambulance_id,
             "transported": transported,
-            "isan": ISAN
+            "isan": ISAN,
         }
         if transported:
             payload["brokenAmbulanceLocation"] = broken_ambulance_location
-        wm_resp = requests.post(
-            "http://wm:5005/handle_breakdown",
-            json=payload
+        wm_resp = requests.post("http://wm:5005/handle_breakdown", json=payload)
+        return (
+            jsonify({"status": "success", "message": "Breakdown successfully sent"}),
+            200,
         )
-        return jsonify({"status": "success", "message": "Breakdown successfully sent"}), 200
     except Exception as e:
         logging.error(f"Error while processing simulation breakdown: {str(e)}")
         return jsonify({"error": f"Internal server error: {str(e)}"}), 500
-
-
 
 
 # ---------------------------------------------------------------------------------------#
@@ -487,7 +551,9 @@ def setIsanRelatedData(id, isan_instance, isan, brokenAmbulanceLocation):
             )
             response_json = map_quest_api_res.content.decode("utf-8")
             if map_quest_api_res.status_code == 200:
-                location = json.loads(response_json)["results"][0]["locations"][0]["displayLatLng"]
+                location = json.loads(response_json)["results"][0]["locations"][0][
+                    "displayLatLng"
+                ]
                 lat = location["lat"]
                 lng = location["lng"]
                 incidentCoordinates = [lat, lng]
@@ -500,7 +566,7 @@ def setIsanRelatedData(id, isan_instance, isan, brokenAmbulanceLocation):
             return
     else:
         lat = brokenAmbulanceLocation["lat"]
-        lng = brokenAmbulanceLocation["lng"]  
+        lng = brokenAmbulanceLocation["lng"]
         incidentCoordinates = [lat, lng]
     EMERGENCY = True
 
@@ -510,49 +576,57 @@ def periodic_request_coordinates_from_rescuetrack():
     if REAL_TRACKING:
         myCursor = myDB.cursor()
         while True:
-            print(f"Active Threads: {[thread.name for thread in threading.enumerate()]}")
+            print(
+                f"Active Threads: {[thread.name for thread in threading.enumerate()]}"
+            )
             # OZ: here i should start send to Rescuetrack API request each 5 (or 1) second(s), asking it about the coordinates of the vehicle.
             vehicleCoordinates = send_soap_request_soap11()
             if vehicleCoordinates == (None, None):
-                #print(f"Failed to fetch coordinates from Rescuetrack API.")
+                # print(f"Failed to fetch coordinates from Rescuetrack API.")
                 # TESTING INSERTING COORDINATES INTO THE DATABASE:
                 sql = "INSERT INTO gps_logs (timestamp, latitude, longitude) VALUES (%s, %s, %s)"
                 if not EMERGENCY:
-                    values = (datetime.now().isoformat(timespec='milliseconds'), 0, 0)  
+                    values = (datetime.now().isoformat(timespec="milliseconds"), 0, 0)
                 if EMERGENCY and not patientLoadedIntoAmbulance:
-                    values = (datetime.now().isoformat(timespec='milliseconds'), 1, 0)
+                    values = (datetime.now().isoformat(timespec="milliseconds"), 1, 0)
                 if patientLoadedIntoAmbulance and not patientLoadedIntoHospital:
-                    values = (datetime.now().isoformat(timespec='milliseconds'), 0, 1) 
+                    values = (datetime.now().isoformat(timespec="milliseconds"), 0, 1)
                 if patientLoadedIntoHospital:
-                    values = (datetime.now().isoformat(timespec='milliseconds'), 1, 1) 
+                    values = (datetime.now().isoformat(timespec="milliseconds"), 1, 1)
                 try:
                     myCursor.execute(sql, values)
-                    myDB.commit() 
+                    myDB.commit()
                     myCursor.close()
                 except Exception as e:
-                    print(f"Database insert failed: {str(e)}")  
+                    print(f"Database insert failed: {str(e)}")
                 # TESTING INSERTING COORDINATES INTO THE DATABASE;
-                time.sleep(10)  
+                time.sleep(10)
                 continue
             else:
                 latitude, longitude = vehicleCoordinates
                 sql = "INSERT INTO gps_logs (timestamp, latitude, longitude) VALUES (%s, %s, %s)"
-                values = (datetime.now().isoformat(timespec='milliseconds'), latitude, longitude)
+                values = (
+                    datetime.now().isoformat(timespec="milliseconds"),
+                    latitude,
+                    longitude,
+                )
                 try:
                     myCursor.execute(sql, values)
-                    myDB.commit() 
+                    myDB.commit()
                     print(f"Saved to Coordinates to table (gps_logs)")
                 except Exception as e:
                     print(f"Database insert failed: {str(e)}")
                 if not EMERGENCY:
-                        current_location = { 
-                            "lat": latitude,
-                            "lng": longitude,
-                        }  
-                        print(f"Current Location: {current_location}")
-                        time.sleep(5)
+                    current_location = {
+                        "lat": latitude,
+                        "lng": longitude,
+                    }
+                    print(f"Current Location: {current_location}")
+                    time.sleep(5)
                 elif EMERGENCY:
-                    if not patientLoadedIntoAmbulance and incidentCoordinates: #and justTestingWithOutRoutes: #TESTING: TO BE  DELETE
+                    if (
+                        not patientLoadedIntoAmbulance and incidentCoordinates
+                    ):  # and justTestingWithOutRoutes: #TESTING: TO BE  DELETE
                         current_location = {
                             "id": ID_INT,
                             "lat": latitude,
@@ -560,9 +634,13 @@ def periodic_request_coordinates_from_rescuetrack():
                             "incident_location": {
                                 "lat": incidentCoordinates[0],
                                 "lng": incidentCoordinates[1],
-                            }
+                            },
                         }
-                    elif hospitalCoordinates and patientLoadedIntoAmbulance and not patientLoadedIntoHospital: #and justTestingWithOutRoutes: #TESTING: TO BE DELETE
+                    elif (
+                        hospitalCoordinates
+                        and patientLoadedIntoAmbulance
+                        and not patientLoadedIntoHospital
+                    ):  # and justTestingWithOutRoutes: #TESTING: TO BE DELETE
                         current_location = {
                             "id": ID_INT,
                             "lat": latitude,
@@ -570,14 +648,14 @@ def periodic_request_coordinates_from_rescuetrack():
                             "hospital_location": {
                                 "lat": hospitalCoordinates[0],
                                 "lng": hospitalCoordinates[1],
-                            }
+                            },
                         }
                     elif patientLoadedIntoHospital:
                         current_location = {
                             "id": ID_INT,
                             "lat": latitude,
                             "lng": longitude,
-                            "isAtHospital": {}
+                            "isAtHospital": {},
                         }
                         patientLoadedIntoAmbulance = False
                         patientLoadedIntoHospital = False
@@ -586,13 +664,15 @@ def periodic_request_coordinates_from_rescuetrack():
                         ISAN = ""
                         ID_INT = 0
                         EMERGENCY = False
-                        time.sleep(10) # to ensure, all CS gets the confirmation data (isAtHospital)
+                        time.sleep(
+                            10
+                        )  # to ensure, all CS gets the confirmation data (isAtHospital)
                     else:
                         current_location = {
-                            "id": ID_INT,  
+                            "id": ID_INT,
                             "lat": latitude,
                             "lng": longitude,
-                        }      
+                        }
                     print(f"Current Location: {current_location}")
-                    #time.sleep(1)  # Time between SOAP requests
+                    # time.sleep(1)  # Time between SOAP requests
         myCursor.close()

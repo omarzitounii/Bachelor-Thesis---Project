@@ -87,7 +87,9 @@ def save_isan_id_pair(isan_id_pair):
 
 
 # OZ: This thread will write the route coordinates from random or predefined start coordinate to the in ISAN incident location.
-def simulation_write_route_to_incident(id, isan_instance, isan, brokenAmbulanceLocation):
+def simulation_write_route_to_incident(
+    id, isan_instance, isan, brokenAmbulanceLocation
+):
     global random_coordinates_set
     logging.info("--> RES_ID: %s", id)
     """
@@ -96,17 +98,20 @@ def simulation_write_route_to_incident(id, isan_instance, isan, brokenAmbulanceL
     min_lng, max_lng = 10.497785388389847, 10.548202571507677 
     startingCoordinates = get_random_coordinates_within_rectangle(min_lat, max_lat, min_lng, max_lng)  
     """
-    #startingCoordinates = [52.27483,10.5053] #id1
-    #startingCoordinates = [52.26863, 10.526249]  # id2
+    # startingCoordinates = [52.27483,10.5053] #id1
+    # startingCoordinates = [52.26863, 10.526249]  # id2
     id_int = int(id)
-    if id_int == 1:  
-        startingCoordinates = [52.27483, 10.5053] #[52.27483, 10.5053] 
-    elif id_int == 2: 
-        startingCoordinates = [52.26863, 10.526249] #[52.26863, 10.526249]
+    if id_int == 1:
+        startingCoordinates = [52.27483, 10.5053]  # [52.27483, 10.5053]
+    elif id_int == 2:
+        startingCoordinates = [52.26863, 10.526249]  # [52.26863, 10.526249]
     elif id_int == 3:
-        startingCoordinates = [52.27553851157736, 10.535364013343754] #[52.27553851157736, 10.535364013343754]
+        startingCoordinates = [
+            52.27553851157736,
+            10.535364013343754,
+        ]  # [52.27553851157736, 10.535364013343754]
     else:
-        startingCoordinates = random.choice(random_coordinates_set)  
+        startingCoordinates = random.choice(random_coordinates_set)
     # (Commented this to save route costs)
     if brokenAmbulanceLocation is None:
         address = get_location_as_map_request(isan_instance.get_location_data())
@@ -117,7 +122,9 @@ def simulation_write_route_to_incident(id, isan_instance, isan, brokenAmbulanceL
             )
             response_json = map_quest_api_res.content.decode("utf-8")
             if map_quest_api_res.status_code == 200:
-                location = json.loads(response_json)["results"][0]["locations"][0]["displayLatLng"]
+                location = json.loads(response_json)["results"][0]["locations"][0][
+                    "displayLatLng"
+                ]
                 lat = location["lat"]
                 lng = location["lng"]
                 incidentCoordinates = [lat, lng]
@@ -129,7 +136,7 @@ def simulation_write_route_to_incident(id, isan_instance, isan, brokenAmbulanceL
             print(f"Could not query map api: {ceex}")
     else:
         lat = brokenAmbulanceLocation["lat"]
-        lng = brokenAmbulanceLocation["lng"]  
+        lng = brokenAmbulanceLocation["lng"]
         incidentCoordinates = [lat, lng]
     # Fetch route coordinates
     url = f"https://www.mapquestapi.com/directions/v2/route?key=xxxxxxxxxxxxxxxxxxxxx&from={startingCoordinates[0]},{startingCoordinates[1]}&to={incidentCoordinates[0]},{incidentCoordinates[1]}&unit=k&fullShape=true&shapeFormat=raw"
@@ -138,7 +145,9 @@ def simulation_write_route_to_incident(id, isan_instance, isan, brokenAmbulanceL
         response.raise_for_status()
         data = response.json()
         shapePoints = data["route"]["shape"]["shapePoints"]
-        routeCoordinates = [[shapePoints[i], shapePoints[i + 1]] for i in range(0, len(shapePoints), 2)]
+        routeCoordinates = [
+            [shapePoints[i], shapePoints[i + 1]] for i in range(0, len(shapePoints), 2)
+        ]
         logging.info(f"Route coordinates fetched successfully for RES_ID: {id}")
     except Exception as e:
         logging.error(f"Error occurred while fetching route: {str(e)}")
@@ -162,7 +171,14 @@ def simulation_write_route_to_incident(id, isan_instance, isan, brokenAmbulanceL
                 )
             for coord in routeCoordinates[1:-1]:
                 csv_writer.writerow(
-                    [id, coord[0], coord[1], incidentCoordinates[0], incidentCoordinates[1], "incident_location"]
+                    [
+                        id,
+                        coord[0],
+                        coord[1],
+                        incidentCoordinates[0],
+                        incidentCoordinates[1],
+                        "incident_location",
+                    ]
                 )
             if routeCoordinates[-1]:
                 last_coord = routeCoordinates[-1]
@@ -181,7 +197,7 @@ def simulation_write_route_to_incident(id, isan_instance, isan, brokenAmbulanceL
     except Exception as e:
         logging.error("Error occurred while writing CSV file: %s", str(e))
     # end COMMENT
-    '''
+    """
     id = int(id)
     isan_id_pairs = load_isan_id_pairs()
     for existing_isan, existing_id in list(isan_id_pairs.items()):
@@ -190,7 +206,7 @@ def simulation_write_route_to_incident(id, isan_instance, isan, brokenAmbulanceL
     # Saving isan <-> id, so that can we can distinguish the main ambulance on the simulation.
     isan_id_pairs[isan] = id
     save_isan_id_pair(isan_id_pairs)
-    '''
+    """
 
 
 # OZ: This thread will write the route coordinates from in ISAN incident location to the hospital location.
@@ -198,14 +214,14 @@ def simulation_write_route_to_hospital(isan, lat, lng):
     savingRouteCosts = 0
     # (Commented this to save route costs)
     try:
-        '''
+        """
         isan_id_pairs = load_isan_id_pairs()
         if isan not in isan_id_pairs:
             logging.error(f"ISAN {isan} not found in ISAN-ID pairs.")
             return
         ambulance_id = isan_id_pairs[isan]
         logging.info(f"Ambulance ID for ISAN {isan}: {ambulance_id}")
-        '''
+        """
         file_name = f"/app/static/simulation_coordinates.csv"
         try:
             with open(file_name, mode="r") as file:
@@ -225,8 +241,13 @@ def simulation_write_route_to_hospital(isan, lat, lng):
             response.raise_for_status()
             data = response.json()
             shapePoints = data["route"]["shape"]["shapePoints"]
-            routeCoordinates = [[shapePoints[i], shapePoints[i + 1]] for i in range(0, len(shapePoints), 2)]
-            logging.info(f"Route coordinates fetched successfully for ambulance ID to hospital.")
+            routeCoordinates = [
+                [shapePoints[i], shapePoints[i + 1]]
+                for i in range(0, len(shapePoints), 2)
+            ]
+            logging.info(
+                f"Route coordinates fetched successfully for ambulance ID to hospital."
+            )
         except Exception as e:
             logging.error(f"Error occurred while fetching route to hospital: {str(e)}")
             return
@@ -272,20 +293,29 @@ def simulation_write_route_to_hospital(isan, lat, lng):
                                 ]
                             )
                         else:
-                            csv_writer.writerow([ambulance_id, last_coord[0], last_coord[1], "isAtHospital"])
+                            csv_writer.writerow(
+                                [
+                                    ambulance_id,
+                                    last_coord[0],
+                                    last_coord[1],
+                                    "isAtHospital",
+                                ]
+                            )
         except Exception as e:
             logging.error("Error occurred while writing CSV file: %s", str(e))
     except Exception as e:
         logging.error(f"Error in simulation_write_route_to_hospital: {str(e)}")
         return
-    
-    #end comment
+
+    # end comment
 
 
 # OZ: This thread will simulate getting data from the Rescuetrack API.
 def simulation_track_single_vehicle():
     global current_location, stop_signal
-    logging.info(f"Thread started for vehicle: (Thread Name: {threading.current_thread().name})")
+    logging.info(
+        f"Thread started for vehicle: (Thread Name: {threading.current_thread().name})"
+    )
     # Simulate tracking from the written file
     file_name = f"/app/static/simulation_coordinates.csv"
     try:
@@ -312,7 +342,10 @@ def simulation_track_single_vehicle():
                             "id": id,
                             "lat": lat,
                             "lng": lng,
-                            "incident_location": {"lat": incident_lat, "lng": incident_lng},
+                            "incident_location": {
+                                "lat": incident_lat,
+                                "lng": incident_lng,
+                            },
                         }
                     elif len(row) > 5 and row[5] == "hospital_location":
                         hospital_lat, hospital_lng = map(float, row[3:5])
@@ -320,10 +353,18 @@ def simulation_track_single_vehicle():
                             "id": id,
                             "lat": lat,
                             "lng": lng,
-                            "hospital_location": {"lat": hospital_lat, "lng": hospital_lng},
+                            "hospital_location": {
+                                "lat": hospital_lat,
+                                "lng": hospital_lng,
+                            },
                         }
                     elif len(row) > 3 and row[3] == "isAtHospital":
-                        current_location = {"id": id, "lat": lat, "lng": lng, "isAtHospital": {}}
+                        current_location = {
+                            "id": id,
+                            "lat": lat,
+                            "lng": lng,
+                            "isAtHospital": {},
+                        }
                     elif len(row) == 3:
                         current_location = {"id": id, "lat": lat, "lng": lng}
                     logging.info(
@@ -348,7 +389,10 @@ def simulation_track_single_vehicle():
                                 "id": id,
                                 "lat": lat,
                                 "lng": lng,
-                                "incident_location": {"lat": incident_lat, "lng": incident_lng},
+                                "incident_location": {
+                                    "lat": incident_lat,
+                                    "lng": incident_lng,
+                                },
                             }
                         elif len(row) > 5 and row[5] == "hospital_location":
                             hospital_lat, hospital_lng = map(float, row[3:5])
@@ -356,10 +400,18 @@ def simulation_track_single_vehicle():
                                 "id": id,
                                 "lat": lat,
                                 "lng": lng,
-                                "hospital_location": {"lat": hospital_lat, "lng": hospital_lng},
+                                "hospital_location": {
+                                    "lat": hospital_lat,
+                                    "lng": hospital_lng,
+                                },
                             }
                         elif len(row) > 3 and row[3] == "isAtHospital":
-                            current_location = {"id": id, "lat": lat, "lng": lng, "isAtHospital": {}}
+                            current_location = {
+                                "id": id,
+                                "lat": lat,
+                                "lng": lng,
+                                "isAtHospital": {},
+                            }
                         elif len(row) == 3:
                             current_location = {"id": id, "lat": lat, "lng": lng}
                         logging.info(
@@ -371,19 +423,21 @@ def simulation_track_single_vehicle():
         logging.error("Error occurred while reading CSV file: %s", str(e))
     finally:
         current_location = {}
-        logging.info(f"Thread finished for vehicle ID: (Thread Name: {threading.current_thread().name})")
+        logging.info(
+            f"Thread finished for vehicle ID: (Thread Name: {threading.current_thread().name})"
+        )
 
 
 # OZ: POST endpoint to stop all active threads, when the user by the Curing System quits the tracking page.
 def simulation_stop_particular_thread():
     global thread, stop_signal
     if stop_signal:
-        stop_signal.set() 
+        stop_signal.set()
         time.sleep(2)
     if thread and thread.is_alive():
-        thread.join() 
-    thread = None 
-    stop_signal = None  
+        thread.join()
+    thread = None
+    stop_signal = None
     logging.info("+++++Thread stopped+++++")
 
 
@@ -413,7 +467,10 @@ def simulation_current_location_single_ambulance():
             position = current_location
             return jsonify({"status": "success", "position": position}), 200
         else:
-            return {"status": "error", "message": f"No location found for ambulance."}, 404
+            return {
+                "status": "error",
+                "message": f"No location found for ambulance.",
+            }, 404
     except Exception as e:
         logging.error(f"Error getting current location for ambulance ID: {str(e)}")
         return {"status": "error", "message": f"An error occurred: {str(e)}"}, 500
@@ -440,10 +497,7 @@ def simulation_breakdown():
         ambulance_id = data.get("ambulanceId")
         transported = data.get("transported")
         broken_ambulance_location = data.get("brokenAmbulanceLocation")
-        payload = {
-            "ambulanceId": ambulance_id,
-            "transported": transported
-        }
+        payload = {"ambulanceId": ambulance_id, "transported": transported}
         mycursor = myDB.cursor()
         select_command = "SELECT isan FROM alarm_list ORDER BY currenttime DESC LIMIT 1"  # Get the most recent ISAN
         mycursor.execute(select_command)
@@ -452,22 +506,22 @@ def simulation_breakdown():
             isan = result[0]
             payload["isan"] = isan  # Add ISAN to the payload
         else:
-            print(f'THE ISAN IS NOT FOUND IN THE ALARM LIST TABLE')
+            print(f"THE ISAN IS NOT FOUND IN THE ALARM LIST TABLE")
             return jsonify({"error": f"ISAN not found"}), 404
-        '''
+        """
         isan_id_pairs = load_isan_id_pairs()
         for isan, id in isan_id_pairs.items():
             if id == ambulance_id:
                 payload["isan"] = isan
                 break
-        '''
+        """
         if broken_ambulance_location:
             payload["brokenAmbulanceLocation"] = broken_ambulance_location
-        wm_resp = requests.post(
-            "http://wm:5005/handle_breakdown",
-            json=payload
+        wm_resp = requests.post("http://wm:5005/handle_breakdown", json=payload)
+        return (
+            jsonify({"status": "success", "message": "Breakdown successfully sent"}),
+            200,
         )
-        return jsonify({"status": "success", "message": "Breakdown successfully sent"}), 200
     except Exception as e:
         logging.error(f"Error while processing simulation breakdown: {str(e)}")
         return jsonify({"error": f"Internal server error: {str(e)}"}), 500

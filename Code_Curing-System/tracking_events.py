@@ -6,8 +6,8 @@
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
 
-#TRACKING_SIMULATION = 0
-#TRACKING_SIMULATION = 1
+# TRACKING_SIMULATION = 0
+# TRACKING_SIMULATION = 1
 
 
 active_connections = set()
@@ -30,36 +30,48 @@ def handle_main_ambulance_isan(data):
 
 
 # OZ: POST endpoint to receive the main ambulance ID and emit it via Socket.IO.
-@app.route('/main_ambulance_id', methods=['POST'])
+@app.route("/main_ambulance_id", methods=["POST"])
 def handle_main_ambulance_id():
     try:
         data = request.get_json()
         if not data:
-            return jsonify({
-                "status": "error",
-                "message": "No data provided in the request."
-            }), 400
-        
+            return (
+                jsonify(
+                    {"status": "error", "message": "No data provided in the request."}
+                ),
+                400,
+            )
+
         ambulance_id = data.get("ambulance_id")
         if ambulance_id:
             socketio.emit(
                 "main_ambulance_id",
                 {"id": ambulance_id},
-                #room=request.sid, 
-                #broadcast=True
+                # room=request.sid,
+                # broadcast=True
             )
-            return jsonify({
-                "status": "success",
-                "message": "Ambulance ID processed successfully."
-            }), 200 
+            return (
+                jsonify(
+                    {
+                        "status": "success",
+                        "message": "Ambulance ID processed successfully.",
+                    }
+                ),
+                200,
+            )
         else:
-            return jsonify({
-                "status": "error",
-                "message": "No ambulance id provided in the request."
-            }), 400
-    except Exception as e:        
-        return {"error": f"An exception occurred: {str(e)}"}, 500 
-      
+            return (
+                jsonify(
+                    {
+                        "status": "error",
+                        "message": "No ambulance id provided in the request.",
+                    }
+                ),
+                400,
+            )
+    except Exception as e:
+        return {"error": f"An exception occurred: {str(e)}"}, 500
+
 
 # OZ: Emits a request to the ISAN system to retrieve coordinates of currently occupied ambulances.
 @socketio.on("start_tracking")
@@ -70,43 +82,50 @@ def handle_start_tracking(data):
         return
     try:
         if TRACKING_SIMULATION == 0 or TRACKING_SIMULATION == 1:
-          response = requests.post(
-              "http://wm:5005/ambulances_coordinates_to_cs",
-              json={"isan": isan},
-          )
+            response = requests.post(
+                "http://wm:5005/ambulances_coordinates_to_cs",
+                json={"isan": isan},
+            )
     except Exception as e:
         print(f"Error while trying to get main ambulance ID: {str(e)}")
 
 
 # OZ: POST endpoint that receives ambulance coordinates and emits them via Socket.IO.
-@app.route('/ambulances_coordinates', methods=['POST'])
+@app.route("/ambulances_coordinates", methods=["POST"])
 def handle_ambulances_coordinates():
     try:
         data = request.get_json()
         if not data:
-            return jsonify({
-                "status": "error",
-                "message": "No data provided in the request."
-            }), 400      
+            return (
+                jsonify(
+                    {"status": "error", "message": "No data provided in the request."}
+                ),
+                400,
+            )
         positionsSet = data.get("positionsSet")
         if positionsSet:
             socketio.emit(
                 "position_update",
                 positionsSet,
-                #room=request.sid, 
-                #broadcast=True
+                # room=request.sid,
+                # broadcast=True
             )
-            return jsonify({
-                "status": "success",
-                "message": "Ambulances Coordinates processed successfully."
-            }), 200 
+            return (
+                jsonify(
+                    {
+                        "status": "success",
+                        "message": "Ambulances Coordinates processed successfully.",
+                    }
+                ),
+                200,
+            )
         else:
-            return jsonify({
-                "status": "error",
-                "message": "No ambulances coordinates."
-            }), 400
-    except Exception as e:        
-        return {"error": f"An exception occurred: {str(e)}"}, 500 
+            return (
+                jsonify({"status": "error", "message": "No ambulances coordinates."}),
+                400,
+            )
+    except Exception as e:
+        return {"error": f"An exception occurred: {str(e)}"}, 500
 
 
 @socketio.on("connect")
@@ -139,71 +158,88 @@ def handle_simulation_ambulance_Breakdown(data):
     global active_connections
     try:
         ambulance_id = data.get("ambulanceId")
-        transported = data["transported"] 
-        payload = {
-            "ambulanceId": ambulance_id,
-            "transported": transported
-        }
+        transported = data["transported"]
+        payload = {"ambulanceId": ambulance_id, "transported": transported}
         broken_ambulance_location = data.get("brokenAmbulanceLocation")
         if broken_ambulance_location:
             payload["brokenAmbulanceLocation"] = broken_ambulance_location
         try:
-            response = requests.get(f"http://rsm:5003/simulation_get_ambulance_ip", params={"ambulance_id": ambulance_id})
+            response = requests.get(
+                f"http://rsm:5003/simulation_get_ambulance_ip",
+                params={"ambulance_id": ambulance_id},
+            )
             if response.status_code == 200:
                 ambulance_ip = response.json().get("ip_address")
                 print(f"Received IP for ambulance {ambulance_id}: {ambulance_ip}")
-                if TRACKING_SIMULATION == 1:       
+                if TRACKING_SIMULATION == 1:
                     if ambulance_ip == "172.18.0.12":
                         port = 5556
                     elif ambulance_ip == "172.18.0.13":
                         port = 5558
                     elif ambulance_ip == "172.18.0.14":
                         port = 5559
-                    rs_resp = requests.post(f"http://{ambulance_ip}:{port}/simulation_breakdown", json=payload)
+                    rs_resp = requests.post(
+                        f"http://{ambulance_ip}:{port}/simulation_breakdown",
+                        json=payload,
+                    )
                 # OZ: For practical case, this should actually start directly from the RS, not from the map like in the simulation!
                 elif TRACKING_SIMULATION == 0:
                     placeholder = 0
-                    #rs_resp = requests.post(
+                    # rs_resp = requests.post(
                     #    "http://172.18.0.1:5556/breakdown",
                     #    json=payload,
-                    #)    
+                    # )
             else:
-                print(f"Failed to retrieve IP for ambulance {ambulance_id}, status: {response.status_code}")
+                print(
+                    f"Failed to retrieve IP for ambulance {ambulance_id}, status: {response.status_code}"
+                )
         except requests.exceptions.RequestException as e:
-            print(f"Error making request to practical_get_ambulance_ip: {e}")    
+            print(f"Error making request to practical_get_ambulance_ip: {e}")
     except Exception as e:
         logging.error(f"Error while handling simulation ambulance breakdown: {str(e)}")
 
 
 # OZ: POST endpoint to receive a broken ambulance ID and emit an event to remove it from the map.
-@app.route('/broken_ambulance_id', methods=['POST'])
+@app.route("/broken_ambulance_id", methods=["POST"])
 def handle_broken_ambulance_id():
     try:
         data = request.get_json()
         if not data:
-            return jsonify({
-                "status": "error",
-                "message": "No data provided in the request."
-            }), 400
+            return (
+                jsonify(
+                    {"status": "error", "message": "No data provided in the request."}
+                ),
+                400,
+            )
         ambulance_id = data.get("ambulance_id")
         if ambulance_id:
             socketio.emit(
                 "ambulance_breakdown_delete_on_map",
                 {"ambulanceId": ambulance_id},
-                #room=request.sid, 
-                #broadcast=True
+                # room=request.sid,
+                # broadcast=True
             )
-            return jsonify({
-                "status": "success",
-                "message": "Ambulance ID processed successfully."
-            }), 200 
+            return (
+                jsonify(
+                    {
+                        "status": "success",
+                        "message": "Ambulance ID processed successfully.",
+                    }
+                ),
+                200,
+            )
         else:
-            return jsonify({
-                "status": "error",
-                "message": "No ambulance id provided in the request."
-            }), 400
-    except Exception as e:        
-        return {"error": f"An exception occurred: {str(e)}"}, 500 
+            return (
+                jsonify(
+                    {
+                        "status": "error",
+                        "message": "No ambulance id provided in the request.",
+                    }
+                ),
+                400,
+            )
+    except Exception as e:
+        return {"error": f"An exception occurred: {str(e)}"}, 500
 
 
 # OZ: Deletes simulation data to avoid manual cleanup and prepares the system for a new, clean simulation scenario.
@@ -230,7 +266,9 @@ def handle_delete_simulation_data():
                 port = 5559
             else:
                 continue  # IP is not recognized
-            post_two = requests.post(f"http://{rs_ip}:{port}/simulation_delete_alarm_list")
+            post_two = requests.post(
+                f"http://{rs_ip}:{port}/simulation_delete_alarm_list"
+            )
             if post_two.status_code != 204:
                 print(f"Failed to delete alarm list in RS: {post_two.text}")
     except Exception as e:
