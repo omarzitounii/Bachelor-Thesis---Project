@@ -169,7 +169,7 @@ def startGettingCoordinatesFromRescuetrack(
         address = get_location_as_map_request(isan_instance.get_location_data())
         try:
             map_quest_api_res = requests.get(
-                f"http://www.mapquestapi.com/geocoding/v1/address?key=3Q4Af0BEG1RNVbxvCXs0caWccrX075Du&location={address}",
+                f"http://www.mapquestapi.com/geocoding/v1/address?key=xxxxxxxxxxxxxxxxxxxx&location={address}",
                 allow_redirects=True,
             )
             response_json = map_quest_api_res.content.decode("utf-8")
@@ -286,7 +286,7 @@ def startGettingCoordinatesFromRescuetrack(
         finalDestinationToIncidentCoordinate = []
         finalDestinationToHospitalCoordinate = []
         startingCoordinates = [52.27483, 10.5053]
-        url = f"https://www.mapquestapi.com/directions/v2/route?key=3Q4Af0BEG1RNVbxvCXs0caWccrX075Du&from={startingCoordinates[0]},{startingCoordinates[1]}&to={incidentCoordinates[0]},{incidentCoordinates[1]}&unit=k&fullShape=true&shapeFormat=raw"
+        url = f"https://www.mapquestapi.com/directions/v2/route?key=xxxxxxxxxxxxxxxxxxxx&from={startingCoordinates[0]},{startingCoordinates[1]}&to={incidentCoordinates[0]},{incidentCoordinates[1]}&unit=k&fullShape=true&shapeFormat=raw"
         try:
             response = requests.get(url)
             response.raise_for_status()
@@ -426,7 +426,7 @@ def setHospitalLocation(lat, lng):
             file_name = f"/app/static/practical_coordinates.csv"
             start_lat = finalDestinationToIncidentCoordinate[0]
             start_lng = finalDestinationToIncidentCoordinate[1]
-            url = f"https://www.mapquestapi.com/directions/v2/route?key=3Q4Af0BEG1RNVbxvCXs0caWccrX075Du&from={start_lat},{start_lng}&to={hospitalCoordinates[0]},{hospitalCoordinates[1]}&unit=k&fullShape=true&shapeFormat=raw"
+            url = f"https://www.mapquestapi.com/directions/v2/route?key=xxxxxxxxxxxxxxxxxxxxx&from={start_lat},{start_lng}&to={hospitalCoordinates[0]},{hospitalCoordinates[1]}&unit=k&fullShape=true&shapeFormat=raw"
             try:
                 response = requests.get(url)
                 response.raise_for_status()
@@ -546,7 +546,7 @@ def setIsanRelatedData(id, isan_instance, isan, brokenAmbulanceLocation):
         address = get_location_as_map_request(isan_instance.get_location_data())
         try:
             map_quest_api_res = requests.get(
-                f"http://www.mapquestapi.com/geocoding/v1/address?key=3Q4Af0BEG1RNVbxvCXs0caWccrX075Du&location={address}",
+                f"http://www.mapquestapi.com/geocoding/v1/address?key=xxxxxxxxxxxxxxxxxxDu&location={address}",
                 allow_redirects=True,
             )
             response_json = map_quest_api_res.content.decode("utf-8")
