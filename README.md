@@ -134,6 +134,7 @@ When the marker at_hospital is received in the location data of an ambulance, al
 
 - Flask (Python)
 - Javascript
+    - Leaflet Library
     - Document Object Model
 - MySQL
 - Docker
