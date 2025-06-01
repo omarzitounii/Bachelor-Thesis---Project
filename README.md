@@ -21,10 +21,11 @@ To view a demonstration of the tracking feature, see the **video** included in t
     - Leaflet Library
     - Document Object Model
 - MySQL
-- Docker
 - REST API - MapQuest API
 - SOAP API - Rescuetrack API
 - Socket.IO
+- Docker
+- Swagger
 - HTML
 - CSS
 
